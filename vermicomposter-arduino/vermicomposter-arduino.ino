@@ -1,26 +1,19 @@
 
-#include "DHT.h"
 
-// Vermicomposter Params
-#define MAX_HUMIDITY 85.0
-
-// DHT11 Params
-#define DHTPIN 2     // what digital pin we're connected to
-#define DHTTYPE DHT11   // DHT 11
+// Condensation sensor
+#define COND_DATA_PIN 2   // Data pin of the condensation sensor
+#define COND_PWD_PIN 10   // Power pin of the condenstion sensor
 
 // Fan params
 #define FANPIN 11
 
-#define ERROR_HUMIDITY 847593.0
-
 unsigned long previousMillis = 0; // last time update
 long interval = 15 * 60 * 1000; // interval at which to do something (milliseconds)
 
-DHT dht(DHTPIN, DHTTYPE);
-
 void setup() {
   Serial.begin(9600);
-  dht.begin();
+  pinMode(COND_DATA_PIN, INPUT);
+  pinMode(COND_PWD_PIN, OUTPUT);
   pinMode(FANPIN, OUTPUT);
 }
 
@@ -31,36 +24,10 @@ void loop() {
   if(currentMillis - previousMillis > interval || currentMillis == 0) {
      previousMillis = currentMillis;  
 
-    float humidity = getHumidity();
-    Serial.print("Humidity: ");
-    Serial.print(humidity);
-    Serial.println(" %");
-    activateFan(humidity > MAX_HUMIDITY && humidity != ERROR_HUMIDITY);
+    // Check the condensation and turn on the fan if needed
+    activateFan(condensationDetected());
     
   }
-  
-}
-
-float getHumidity() {
-
-  float humidity = dht.readHumidity();
-  // Read temperature as Celsius (the default)
-  float t = dht.readTemperature();
-
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(humidity) || isnan(t)) {
-    Serial.println("Failed to read from DHT sensor!");
-    return ERROR_HUMIDITY;
-  }
-
-//  Serial.print("Humidity: ");
-//  Serial.print(humidity);
-//  Serial.print(" %\t");
-//  Serial.print("Temperature: ");
-//  Serial.print(t);
-//  Serial.println(" *C ");
-
-  return humidity;
   
 }
 
@@ -70,5 +37,13 @@ void activateFan(boolean activate) {
   } else {
     analogWrite(FANPIN, 0);
   }
+}
+
+bool condensationDetected() {
+  analogWrite(COND_PWD_PIN, 255);
+  delay(1000);
+  bool detected = digitalRead(COND_DATA_PIN) == LOW;  // LOW = Condensation
+  analogWrite(COND_PWD_PIN, 0);
+  return detected;
 }
 
