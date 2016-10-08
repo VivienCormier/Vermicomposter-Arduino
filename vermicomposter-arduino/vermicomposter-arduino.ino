@@ -10,6 +10,10 @@
 #define HUMD1_DATA_PIN A0   // Data pin of the humidity sensor
 #define HUMD1_PWD_PIN 7   // Power pin of the humidity sensor
 
+// Humidity box leve 2
+#define HUMD2_DATA_PIN A1   // Data pin of the humidity sensor
+#define HUMD2_PWD_PIN 6   // Power pin of the humidity sensor
+
 // Top Fan params
 #define FANPIN 11
 
@@ -35,6 +39,7 @@ void setup() {
   pinMode(COND_DATA_PIN, INPUT);
   pinMode(COND_PWD_PIN, OUTPUT);
   pinMode(HUMD1_PWD_PIN, OUTPUT);
+  pinMode(HUMD2_PWD_PIN, OUTPUT);
   pinMode(FANPIN, OUTPUT);
   sensors.begin();
 }
@@ -46,7 +51,7 @@ void loop() {
   if(currentMillis - previousMillis > interval || forceFirstLoop) {
      previousMillis = currentMillis;  
 
-     forceFirstLoop = false;
+    forceFirstLoop = false;
 
     // Check the condensation and turn on the fan if needed
     bool condensationIsDetected = condensationDetected();
@@ -63,22 +68,20 @@ void loop() {
     // Temperature level 2
     float tempLevel2 = temperatureLevel2();
 
-    activateFanTopBox(condensationIsDetected || tempLevel2 > 26.0);
-    activateFanLevel1(tempLevel1>26.0);
+    // Humidity level 2
+    float humdLevel2 = humidityLevel2();
 
-    Serial.print("Condensation detected : ");
-    if (condensationIsDetected) {
-      Serial.print("YES");
-    } else {
-      Serial.print("NO");
-    }
-    Serial.print(" | Temp level 1 : ");
-    Serial.print(tempLevel1);
-    Serial.print("°C");
-    Serial.print(" | Humd level 1 : ");
-    Serial.print(humdLevel1);
-    Serial.print(" | Temp level 2 : ");
-    Serial.println(tempLevel2);
+    // Active fan top box
+    boolean fanTopBoxEnabled = condensationIsDetected || tempLevel2 > 26.0;
+
+    // Active fan Level 1
+    boolean fanLevel1Enabled = tempLevel1>26.0;
+
+    activateFanTopBox(fanTopBoxEnabled);
+    activateFanLevel1(fanLevel1Enabled);
+
+    printData(condensationIsDetected, tempLevel1, tempLevel2, humdLevel1, humdLevel2, fanTopBoxEnabled, fanLevel1Enabled);
+    
   }
   
 }
@@ -121,9 +124,63 @@ float humidityLevel1() {
   analogWrite(HUMD1_PWD_PIN, 255);
   delay(1000);
   float humidity = analogRead(HUMD1_DATA_PIN);
-//  humidity = 100 * humidity / 18;
-//  delay(2000);
   analogWrite(HUMD1_PWD_PIN, 0);
   return humidity;
+}
+
+// Turn on the condensation sensor and 
+float humidityLevel2() {
+  analogWrite(HUMD2_PWD_PIN, 255);
+  delay(1000);
+  float humidity = analogRead(HUMD2_DATA_PIN);
+  analogWrite(HUMD2_PWD_PIN, 0);
+  return humidity;
+}
+
+void printData(boolean condensationIsDetected, float tempLevel1, float tempLevel2, float humdLevel1, float humdLevel2, boolean fanTopBoxEnabled, boolean fanLevel1Enabled) {
+
+    Serial.print("{");
+    
+    Serial.print("\"condensation\":");
+    if (condensationIsDetected) {
+      Serial.print("true");
+    } else {
+      Serial.print("false");
+    }
+    Serial.print(",");
+
+    Serial.print("\"temp_level_1\":");
+    Serial.print(tempLevel1);
+    Serial.print(",");
+
+    Serial.print("\"temp_level_2\":");
+    Serial.print(tempLevel2);
+    Serial.print(",");
+
+    Serial.print("\"humd_level_1\":");
+    Serial.print(humdLevel1);
+    Serial.print(",");
+
+    Serial.print("\"humd_level_2\":");
+    Serial.print(humdLevel2);
+    Serial.print(",");
+
+    Serial.print("\"fan_top_box_enabled\":");
+    if (fanTopBoxEnabled) {
+      Serial.print("true");
+    } else {
+      Serial.print("false");
+    }
+    Serial.print(",");
+
+    Serial.print("\"fan_level_1_enabled\":");
+    if (fanLevel1Enabled) {
+      Serial.print("true");
+    } else {
+      Serial.print("false");
+    }
+    
+    Serial.println("}");
+
 }
 
