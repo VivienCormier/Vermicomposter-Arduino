@@ -156,15 +156,15 @@ bool condensationDetected() {
 }
 
 float temperatureLevel1() {
-   return sensors.getTempCByIndex(2);
-}
-
-float temperatureLevel2() {
    return sensors.getTempCByIndex(1);
 }
 
-float temperatureLevel3() {
+float temperatureLevel2() {
    return sensors.getTempCByIndex(0);
+}
+
+float temperatureLevel3() {
+   return sensors.getTempCByIndex(2);
 }
 
 // Turn on the condensation sensor and 
