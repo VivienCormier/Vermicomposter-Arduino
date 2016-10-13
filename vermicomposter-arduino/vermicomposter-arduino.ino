@@ -92,7 +92,7 @@ void loop() {
     float humdLevel3 = humidityLevel3();
 
     // Active fan top box
-    boolean fanTopBoxEnabled = condensationIsDetected;
+    boolean fanTopBoxEnabled = condensationIsDetected && tempLevel1>15.0;
 
     // Active fan Level 1
     boolean fanLevel1Enabled = tempLevel1>26.0;
