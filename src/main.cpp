@@ -34,6 +34,9 @@
 // Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 8
 
+// If the temperature is -127, it's probably wrong
+#define ERROR_TEMPERATURE -127
+
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
 
@@ -125,7 +128,7 @@ float humidityLevel3() {
   return humidity;
 }
 
-void printData(boolean condensationIsDetected, float tempLevel1, float tempLevel2, float tempLevel3, float humdLevel1, float humdLevel2, float humdLevel3, boolean fanTopBoxEnabled, boolean fanLevel1Enabled, boolean fanLevel2Enabled, boolean fanLevel3Enabled) {
+void printData(boolean condensationIsDetected, float tempLevel1, float tempLevel2, float tempLevel3, float humdLevel1, float humdLevel2, float humdLevel3, boolean fanTopBoxEnabled, boolean fanLevel1Enabled, boolean fanLevel2Enabled, boolean fanLevel3Enabled, String errorMessage) {
 
     Serial.print("{");
 
@@ -137,17 +140,23 @@ void printData(boolean condensationIsDetected, float tempLevel1, float tempLevel
     }
     Serial.print(",");
 
-    Serial.print("\"temp_level_1\":");
-    Serial.print(tempLevel1);
-    Serial.print(",");
+    if (tempLevel1 != ERROR_TEMPERATURE) {
+      Serial.print("\"temp_level_1\":");
+      Serial.print(tempLevel1);
+      Serial.print(",");
+    }
 
-    Serial.print("\"temp_level_2\":");
-    Serial.print(tempLevel2);
-    Serial.print(",");
+    if (tempLevel2 != ERROR_TEMPERATURE) {
+      Serial.print("\"temp_level_2\":");
+      Serial.print(tempLevel2);
+      Serial.print(",");
+    }
 
-    Serial.print("\"temp_level_3\":");
-    Serial.print(tempLevel3);
-    Serial.print(",");
+    if (tempLevel3 != ERROR_TEMPERATURE) {
+      Serial.print("\"temp_level_3\":");
+      Serial.print(tempLevel3);
+      Serial.print(",");
+    }
 
     Serial.print("\"humd_level_1\":");
     Serial.print(humdLevel1);
@@ -192,6 +201,12 @@ void printData(boolean condensationIsDetected, float tempLevel1, float tempLevel
       Serial.print("false");
     }
 
+    if (!errorMessage.equals("")) {
+      Serial.print("\"error_message\":");
+      Serial.print(errorMessage);
+      Serial.print(",");
+    }
+
     Serial.println("}");
 
 }
@@ -221,6 +236,12 @@ void loop() {
 
     // Check the condensation and turn on the fan if needed
     bool condensationIsDetected = condensationDetected();
+
+    // Check if all temperature sensor are connected
+    String errorMessage = "";
+    if (sensors.getDeviceCount() != 3) {
+      errorMessage = "Missing sensor";
+    }
 
     // Activate temperature sensor
     sensors.requestTemperatures();
@@ -261,7 +282,7 @@ void loop() {
     activateFanLevel2(fanLevel2Enabled);
     activateFanLevel1(fanLevel1Enabled);
 
-    printData(condensationIsDetected, tempLevel1, tempLevel2, tempLevel3, humdLevel1, humdLevel2, humdLevel3, fanTopBoxEnabled, fanLevel1Enabled, fanLevel2Enabled, fanLevel3Enabled);
+    printData(condensationIsDetected, tempLevel1, tempLevel2, tempLevel3, humdLevel1, humdLevel2, humdLevel3, fanTopBoxEnabled, fanLevel1Enabled, fanLevel2Enabled, fanLevel3Enabled, errorMessage);
 
   }
 

@@ -22,3 +22,9 @@ https://github.com/adafruit/DHT-sensor-library
 
 # Bugs
 Unfortunately the 100% humidity rate is reached to soon and the fan is triggered all the time. The compost become too dry. We should use a rain sensor to detect the condensation and turn on the fan if the top box is too humid.
+
+# Platformio
+
+## Upload
+
+'platformio run --target upload'
