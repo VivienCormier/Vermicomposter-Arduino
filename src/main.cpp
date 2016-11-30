@@ -31,17 +31,21 @@
 // Fan box level 3
 #define FAN3_PWD_PIN 5
 
-// Data wire is plugged into pin 2 on the Arduino
-#define ONE_WIRE_BUS 8
+// Temp level 1
+#define TMP1_DATA_PIN 13
 
-// If the temperature is -127, it's probably wrong
-#define ERROR_TEMPERATURE -127
+// Temp level 2
+#define TMP2_DATA_PIN 8
 
-// Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(ONE_WIRE_BUS);
+// Temp level 3
+#define TMP3_DATA_PIN 3
 
-// Pass our oneWire reference to Dallas Temperature.
-DallasTemperature sensors(&oneWire);
+OneWire oneWire1(TMP1_DATA_PIN);
+DallasTemperature sensorTemp1(&oneWire1);
+OneWire oneWire2(TMP2_DATA_PIN);
+DallasTemperature sensorTemp2(&oneWire2);
+OneWire oneWire3(TMP3_DATA_PIN);
+DallasTemperature sensorTemp3(&oneWire3);
 
 bool forceFirstLoop = true;
 
@@ -90,15 +94,15 @@ void activateFanLevel1(boolean activate) {
 }
 
 float temperatureLevel1() {
-   return sensors.getTempCByIndex(1);
+   return sensorTemp1.getTempCByIndex(0);
 }
 
 float temperatureLevel2() {
-   return sensors.getTempCByIndex(0);
+   return sensorTemp2.getTempCByIndex(0);
 }
 
 float temperatureLevel3() {
-   return sensors.getTempCByIndex(2);
+   return sensorTemp3.getTempCByIndex(0);
 }
 
 // Turn on the condensation sensor and
@@ -140,19 +144,19 @@ void printData(boolean condensationIsDetected, float tempLevel1, float tempLevel
     }
     Serial.print(",");
 
-    if (tempLevel1 != ERROR_TEMPERATURE) {
+    if (tempLevel1 != DEVICE_DISCONNECTED_C) {
       Serial.print("\"temp_level_1\":");
       Serial.print(tempLevel1);
       Serial.print(",");
     }
 
-    if (tempLevel2 != ERROR_TEMPERATURE) {
+    if (tempLevel2 != DEVICE_DISCONNECTED_C) {
       Serial.print("\"temp_level_2\":");
       Serial.print(tempLevel2);
       Serial.print(",");
     }
 
-    if (tempLevel3 != ERROR_TEMPERATURE) {
+    if (tempLevel3 != DEVICE_DISCONNECTED_C) {
       Serial.print("\"temp_level_3\":");
       Serial.print(tempLevel3);
       Serial.print(",");
@@ -222,7 +226,9 @@ void setup() {
   pinMode(FAN1_PWD_PIN, OUTPUT);
   pinMode(FAN2_PWD_PIN, OUTPUT);
   pinMode(FAN3_PWD_PIN, OUTPUT);
-  sensors.begin();
+  sensorTemp1.begin();
+  sensorTemp2.begin();
+  sensorTemp3.begin();
 }
 
 void loop() {
@@ -239,27 +245,35 @@ void loop() {
 
     // Check if all temperature sensor are connected
     String errorMessage = "";
-    if (sensors.getDeviceCount() != 3) {
-      errorMessage = "Missing sensor";
-    }
 
     // Activate temperature sensor
-    sensors.requestTemperatures();
+    sensorTemp1.requestTemperatures();
+    sensorTemp2.requestTemperatures();
+    sensorTemp3.requestTemperatures();
 
     // Temperature level 1
     float tempLevel1 = temperatureLevel1();
+    if (tempLevel1 == DEVICE_DISCONNECTED_C) {
+      errorMessage += "Temperature sensor level 1 disconnected. ";
+    }
 
     // Humidity level 1
     float humdLevel1 = humidityLevel1();
 
     // Temperature level 2
     float tempLevel2 = temperatureLevel2();
+    if (tempLevel2 == DEVICE_DISCONNECTED_C) {
+      errorMessage += "Temperature sensor level 2 disconnected. ";
+    }
 
     // Humidity level 2
     float humdLevel2 = humidityLevel2();
 
     // Temperature level 3
     float tempLevel3 = temperatureLevel3();
+    if (tempLevel3 == DEVICE_DISCONNECTED_C) {
+      errorMessage += "Temperature sensor level 3 disconnected. ";
+    }
 
     // Humidity level 3
     float humdLevel3 = humidityLevel3();
