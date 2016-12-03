@@ -4,7 +4,7 @@
 #include <DallasTemperature.h>
 
 // Condensation sensor
-#define COND_DATA_PIN 2   // Data pin of the condensation sensor
+#define COND_DATA_PIN A3   // Data pin of the condensation sensor
 #define COND_PWD_PIN 10   // Power pin of the condenstion sensor
 
 // Humidity box leve 1
@@ -53,12 +53,12 @@ unsigned long previousMillis = 0; // last time update
 unsigned long interval = 15 * 60 * 1000L; // interval at which to do something (milliseconds)
 
 // Turn on the condensation sensor and
-bool condensationDetected() {
+float condensationTop() {
   analogWrite(COND_PWD_PIN, 255);
   delay(1000);
-  bool detected = digitalRead(COND_DATA_PIN) == LOW;  // LOW = Condensation
+  float condensation = analogRead(COND_DATA_PIN);
   analogWrite(COND_PWD_PIN, 0);
-  return detected;
+  return condensation;
 }
 
 void activateFanTopBox(boolean activate) {
@@ -105,7 +105,6 @@ float temperatureLevel3() {
    return sensorTemp3.getTempCByIndex(0);
 }
 
-// Turn on the condensation sensor and
 float humidityLevel1() {
   analogWrite(HUMD1_PWD_PIN, 255);
   delay(1000);
@@ -114,7 +113,6 @@ float humidityLevel1() {
   return humidity;
 }
 
-// Turn on the condensation sensor and
 float humidityLevel2() {
   analogWrite(HUMD2_PWD_PIN, 255);
   delay(1000);
@@ -123,7 +121,6 @@ float humidityLevel2() {
   return humidity;
 }
 
-// Turn on the condensation sensor and
 float humidityLevel3() {
   analogWrite(HUMD3_PWD_PIN, 255);
   delay(1000);
@@ -132,16 +129,12 @@ float humidityLevel3() {
   return humidity;
 }
 
-void printData(boolean condensationIsDetected, float tempLevel1, float tempLevel2, float tempLevel3, float humdLevel1, float humdLevel2, float humdLevel3, boolean fanTopBoxEnabled, boolean fanLevel1Enabled, boolean fanLevel2Enabled, boolean fanLevel3Enabled, String errorMessage) {
+void printData(float condensation, float tempLevel1, float tempLevel2, float tempLevel3, float humdLevel1, float humdLevel2, float humdLevel3, boolean fanTopBoxEnabled, boolean fanLevel1Enabled, boolean fanLevel2Enabled, boolean fanLevel3Enabled, String errorMessage) {
 
     Serial.print("{");
 
-    Serial.print("\"condensation\":");
-    if (condensationIsDetected) {
-      Serial.print("true");
-    } else {
-      Serial.print("false");
-    }
+    Serial.print("\"condensation_top\":");
+    Serial.print(condensation);
     Serial.print(",");
 
     if (tempLevel1 != DEVICE_DISCONNECTED_C) {
@@ -217,7 +210,6 @@ void printData(boolean condensationIsDetected, float tempLevel1, float tempLevel
 
 void setup() {
   Serial.begin(9600);
-  pinMode(COND_DATA_PIN, INPUT);
   pinMode(COND_PWD_PIN, OUTPUT);
   pinMode(HUMD1_PWD_PIN, OUTPUT);
   pinMode(HUMD2_PWD_PIN, OUTPUT);
@@ -241,7 +233,7 @@ void loop() {
     forceFirstLoop = false;
 
     // Check the condensation and turn on the fan if needed
-    bool condensationIsDetected = condensationDetected();
+    float condensation = condensationTop();
 
     // Check if all temperature sensor are connected
     String errorMessage = "";
@@ -279,7 +271,7 @@ void loop() {
     float humdLevel3 = humidityLevel3();
 
     // Active fan top box
-    boolean fanTopBoxEnabled = condensationIsDetected && tempLevel3>15.0;
+    boolean fanTopBoxEnabled = condensation< 512 && tempLevel3>15.0;
 
     // Active fan Level 3
     boolean fanLevel3Enabled = (fanTopBoxEnabled || tempLevel3>26.0  || humdLevel3 < 37.0) && tempLevel3>15.0;
@@ -296,7 +288,7 @@ void loop() {
     activateFanLevel2(fanLevel2Enabled);
     activateFanLevel1(fanLevel1Enabled);
 
-    printData(condensationIsDetected, tempLevel1, tempLevel2, tempLevel3, humdLevel1, humdLevel2, humdLevel3, fanTopBoxEnabled, fanLevel1Enabled, fanLevel2Enabled, fanLevel3Enabled, errorMessage);
+    printData(condensation, tempLevel1, tempLevel2, tempLevel3, humdLevel1, humdLevel2, humdLevel3, fanTopBoxEnabled, fanLevel1Enabled, fanLevel2Enabled, fanLevel3Enabled, errorMessage);
 
   }
 
