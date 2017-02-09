@@ -274,13 +274,13 @@ void loop() {
     boolean fanTopBoxEnabled = condensation< 600 && tempLevel3>15.0;
 
     // Active fan Level 3
-    boolean fanLevel3Enabled = (fanTopBoxEnabled || tempLevel3>26.0  || humdLevel3 < 37.0) && tempLevel3>15.0;
+    boolean fanLevel3Enabled = (fanTopBoxEnabled || tempLevel3>26.0  || humdLevel3 < 100.0) && tempLevel3>15.0;
 
     // Active fan Level 2
-    boolean fanLevel2Enabled = (tempLevel2>26.0 || humdLevel2 < 37.0) && tempLevel2>15.0;
+    boolean fanLevel2Enabled = (tempLevel2>26.0 || humdLevel2 < 100.0) && tempLevel2>15.0;
 
     // Active fan Level 1
-    boolean fanLevel1Enabled =  (tempLevel1>26.0 || humdLevel1 < 37.0) && tempLevel1>15.0;
+    boolean fanLevel1Enabled =  (tempLevel1>26.0 || humdLevel1 < 100.0) && tempLevel1>15.0;
 
 
     activateFanTopBox(fanTopBoxEnabled);
