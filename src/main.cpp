@@ -3,6 +3,11 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+#define HUMD_LIMIT_LEVEL 100.0
+#define COND_LIMIT_LEVEL 600.0
+#define TEMP_MAX 26.0
+#define TEMP_MIN 15.0
+
 // Condensation sensor
 #define COND_DATA_PIN A3   // Data pin of the condensation sensor
 #define COND_PWD_PIN 10   // Power pin of the condenstion sensor
@@ -204,6 +209,22 @@ void printData(float condensation, float tempLevel1, float tempLevel2, float tem
       Serial.print(",");
     }
 
+    Serial.print("\"humd_limit_level\":");
+    Serial.print(HUMD_LIMIT_LEVEL);
+    Serial.print(",");
+
+    Serial.print("\"temp_min\":");
+    Serial.print(TEMP_MIN);
+    Serial.print(",");
+
+    Serial.print("\"temp_max\":");
+    Serial.print(TEMP_MAX);
+    Serial.print(",");
+
+    Serial.print("\"cond_limit_level\":");
+    Serial.print(COND_LIMIT_LEVEL);
+    Serial.print(",");
+
     Serial.println("}");
 
 }
@@ -271,16 +292,16 @@ void loop() {
     float humdLevel3 = humidityLevel3();
 
     // Active fan top box
-    boolean fanTopBoxEnabled = condensation< 600 && tempLevel3>15.0;
+    boolean fanTopBoxEnabled = condensation< COND_LIMIT_LEVEL && tempLevel3>TEMP_MIN;
 
     // Active fan Level 3
-    boolean fanLevel3Enabled = (fanTopBoxEnabled || tempLevel3>26.0  || humdLevel3 < 100.0) && tempLevel3>15.0;
+    boolean fanLevel3Enabled = (fanTopBoxEnabled || tempLevel3>TEMP_MAX  || humdLevel3 < HUMD_LIMIT_LEVEL) && tempLevel3>TEMP_MIN;
 
     // Active fan Level 2
-    boolean fanLevel2Enabled = (tempLevel2>26.0 || humdLevel2 < 100.0) && tempLevel2>15.0;
+    boolean fanLevel2Enabled = (tempLevel2>TEMP_MAX || humdLevel2 < HUMD_LIMIT_LEVEL) && tempLevel2>TEMP_MIN;
 
     // Active fan Level 1
-    boolean fanLevel1Enabled =  (tempLevel1>26.0 || humdLevel1 < 100.0) && tempLevel1>15.0;
+    boolean fanLevel1Enabled =  (tempLevel1>TEMP_MAX || humdLevel1 < HUMD_LIMIT_LEVEL) && tempLevel1>TEMP_MIN;
 
 
     activateFanTopBox(fanTopBoxEnabled);
