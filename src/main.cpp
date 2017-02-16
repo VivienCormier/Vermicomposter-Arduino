@@ -25,7 +25,7 @@
 #define HUMD3_PWD_PIN 4   // Power pin of the humidity sensor
 
 // Top Fan params
-#define FANPIN 11
+#define FANTOP_PWD_PIN 11
 
 // Fan box level 1
 #define FAN1_PWD_PIN 12
@@ -57,44 +57,35 @@ bool forceFirstLoop = true;
 unsigned long previousMillis = 0; // last time update
 unsigned long interval = 15 * 60 * 1000L; // interval at which to do something (milliseconds)
 
-// Turn on the condensation sensor and
-float condensationTop() {
-  analogWrite(COND_PWD_PIN, 255);
-  delay(1000);
-  float condensation = analogRead(COND_DATA_PIN);
-  analogWrite(COND_PWD_PIN, 0);
-  return condensation;
-}
-
 void activateFanTopBox(boolean activate) {
   if (activate) {
-    analogWrite(FANPIN, 255);
+    digitalWrite(FANTOP_PWD_PIN, HIGH);
   } else {
-    analogWrite(FANPIN, 0);
+    digitalWrite(FANTOP_PWD_PIN, LOW);
   }
 }
 
 void activateFanLevel3(boolean activate) {
   if (activate) {
-    analogWrite(FAN3_PWD_PIN, 255);
+    digitalWrite(FAN3_PWD_PIN, HIGH);
   } else {
-    analogWrite(FAN3_PWD_PIN, 0);
+    digitalWrite(FAN3_PWD_PIN, LOW);
   }
 }
 
 void activateFanLevel2(boolean activate) {
   if (activate) {
-    analogWrite(FAN2_PWD_PIN, 255);
+    digitalWrite(FAN2_PWD_PIN, HIGH);
   } else {
-    analogWrite(FAN2_PWD_PIN, 0);
+    digitalWrite(FAN2_PWD_PIN, LOW);
   }
 }
 
 void activateFanLevel1(boolean activate) {
   if (activate) {
-    analogWrite(FAN1_PWD_PIN, 255);
+    digitalWrite(FAN1_PWD_PIN, HIGH);
   } else {
-    analogWrite(FAN1_PWD_PIN, 0);
+    digitalWrite(FAN1_PWD_PIN, LOW);
   }
 }
 
@@ -110,27 +101,35 @@ float temperatureLevel3() {
    return sensorTemp3.getTempCByIndex(0);
 }
 
+float condensationTop() {
+  digitalWrite(COND_PWD_PIN, HIGH);
+  delay(1000);
+  float condensation = analogRead(COND_DATA_PIN);
+  digitalWrite(COND_PWD_PIN, LOW);
+  return condensation;
+}
+
 float humidityLevel1() {
-  analogWrite(HUMD1_PWD_PIN, 255);
+  digitalWrite(HUMD1_PWD_PIN, HIGH);
   delay(1000);
   float humidity = analogRead(HUMD1_DATA_PIN);
-  analogWrite(HUMD1_PWD_PIN, 0);
+  digitalWrite(HUMD1_PWD_PIN, LOW);
   return humidity;
 }
 
 float humidityLevel2() {
-  analogWrite(HUMD2_PWD_PIN, 255);
+  digitalWrite(HUMD2_PWD_PIN, HIGH);
   delay(1000);
   float humidity = analogRead(HUMD2_DATA_PIN);
-  analogWrite(HUMD2_PWD_PIN, 0);
+  digitalWrite(HUMD2_PWD_PIN, LOW);
   return humidity;
 }
 
 float humidityLevel3() {
-  analogWrite(HUMD3_PWD_PIN, 255);
+  digitalWrite(HUMD3_PWD_PIN, HIGH);
   delay(1000);
   float humidity = analogRead(HUMD3_DATA_PIN);
-  analogWrite(HUMD3_PWD_PIN, 0);
+  digitalWrite(HUMD3_PWD_PIN, LOW);
   return humidity;
 }
 
@@ -235,7 +234,7 @@ void setup() {
   pinMode(HUMD1_PWD_PIN, OUTPUT);
   pinMode(HUMD2_PWD_PIN, OUTPUT);
   pinMode(HUMD3_PWD_PIN, OUTPUT);
-  pinMode(FANPIN, OUTPUT);
+  pinMode(FANTOP_PWD_PIN, OUTPUT);
   pinMode(FAN1_PWD_PIN, OUTPUT);
   pinMode(FAN2_PWD_PIN, OUTPUT);
   pinMode(FAN3_PWD_PIN, OUTPUT);
