@@ -204,9 +204,9 @@ void printData(float condensation, float tempLevel1, float tempLevel2, float tem
     Serial.print(",");
 
     if (!errorMessage.equals("")) {
-      Serial.print("\"error_message\":");
+      Serial.print("\"error_message\": \"");
       Serial.print(errorMessage);
-      Serial.print(",");
+      Serial.print("\",");
     }
 
     Serial.print("\"humd_limit_level\":");
