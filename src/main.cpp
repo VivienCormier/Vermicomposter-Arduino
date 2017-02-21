@@ -201,6 +201,7 @@ void printData(float condensation, float tempLevel1, float tempLevel2, float tem
     } else {
       Serial.print("false");
     }
+    Serial.print(",");
 
     if (!errorMessage.equals("")) {
       Serial.print("\"error_message\":");
@@ -222,7 +223,6 @@ void printData(float condensation, float tempLevel1, float tempLevel2, float tem
 
     Serial.print("\"cond_limit_level\":");
     Serial.print(COND_LIMIT_LEVEL);
-    Serial.print(",");
 
     Serial.println("}");
 
