@@ -90,15 +90,21 @@ void activateFanLevel1(boolean activate) {
 }
 
 float temperatureLevel1() {
-   return sensorTemp1.getTempCByIndex(0);
+  float temp = sensorTemp1.getTempCByIndex(0);
+  if (temp < -10 || temp > 50) { return DEVICE_DISCONNECTED_C; }
+  return temp;
 }
 
 float temperatureLevel2() {
-   return sensorTemp2.getTempCByIndex(0);
+  float temp = sensorTemp2.getTempCByIndex(0);
+  if (temp < -10 || temp > 50) { return DEVICE_DISCONNECTED_C; }
+  return temp;
 }
 
 float temperatureLevel3() {
-   return sensorTemp3.getTempCByIndex(0);
+  float temp = sensorTemp3.getTempCByIndex(0);
+  if (temp < -10 || temp > 50) { return DEVICE_DISCONNECTED_C; }
+  return temp;
 }
 
 float condensationTop() {
