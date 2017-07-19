@@ -3,7 +3,8 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define HUMD_LIMIT_LEVEL 100.0
+#define HUMD_MAX_LIMIT_LEVEL 100.0
+#define HUMD_MIN_LIMIT_LEVEL 500.0
 #define COND_LIMIT_LEVEL 600.0
 #define TEMP_MAX 26.0
 #define TEMP_MIN 15.0
@@ -139,6 +140,51 @@ float humidityLevel3() {
   return humidity;
 }
 
+bool shouldEnableFanTopBox(float condensation, float tempLevel3) {
+  // Off - If tempLevel3 is too low
+  if ( tempLevel3 < TEMP_MIN ) { return false; }
+  // On - If condensation is detected
+  return condensation < COND_LIMIT_LEVEL;
+}
+
+bool shouldEnableFanLevel3(float tempLevel3, float humdLevel3, bool fanTopBoxEnabled) {
+  // Off - If tempLevel3 is too low
+  if ( tempLevel3 < TEMP_MIN ) { return false; }
+  // Off - If humdLevel3 is too low
+  if ( humdLevel3 < HUMD_MIN_LIMIT_LEVEL ) { return false; }
+  // On - If condensation is detected
+  if ( fanTopBoxEnabled ) { return true; }
+  // On - If tempLevel3 is too high
+  if ( tempLevel3 > TEMP_MAX ) { return true; }
+  // On - If humdLevel3 is too high
+  if ( humdLevel3 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
+  return false;
+}
+
+bool shouldEnableFanLevel2(float tempLevel2, float humdLevel2) {
+  // Off - If tempLevel2 is too low
+  if ( tempLevel2 < TEMP_MIN ) { return false; }
+  // Off - If humdLevel2 is too low
+  if ( humdLevel2 < HUMD_MIN_LIMIT_LEVEL ) { return false; }
+  // On - If tempLevel2 is too high
+  if ( tempLevel2 > TEMP_MAX ) { return true; }
+  // On - If humdLevel2 is too high
+  if ( humdLevel2 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
+  return false;
+}
+
+bool shouldEnableFanLevel1(float tempLevel1, float humdLevel1) {
+  // Off - If tempLevel1 is too low
+  if ( tempLevel1 < TEMP_MIN ) { return false; }
+  // Off - If humdLevel1 is too low
+  if ( humdLevel1 < HUMD_MIN_LIMIT_LEVEL ) { return false; }
+  // On - If tempLevel1 is too high
+  if ( tempLevel1 > TEMP_MAX ) { return true; }
+  // On - If humdLevel1 is too high
+  if ( humdLevel1 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
+  return false;
+}
+
 void printData(float condensation, float tempLevel1, float tempLevel2, float tempLevel3, float humdLevel1, float humdLevel2, float humdLevel3, boolean fanTopBoxEnabled, boolean fanLevel1Enabled, boolean fanLevel2Enabled, boolean fanLevel3Enabled, String errorMessage) {
 
     Serial.print("{");
@@ -215,8 +261,8 @@ void printData(float condensation, float tempLevel1, float tempLevel2, float tem
       Serial.print("\",");
     }
 
-    Serial.print("\"humd_limit_level\":");
-    Serial.print(HUMD_LIMIT_LEVEL);
+    Serial.print("\"HUMD_MAX_LIMIT_LEVEL\":");
+    Serial.print(HUMD_MAX_LIMIT_LEVEL);
     Serial.print(",");
 
     Serial.print("\"temp_min\":");
@@ -297,16 +343,16 @@ void loop() {
     float humdLevel3 = humidityLevel3();
 
     // Active fan top box
-    boolean fanTopBoxEnabled = condensation< COND_LIMIT_LEVEL && tempLevel3>TEMP_MIN;
+    boolean fanTopBoxEnabled = shouldEnableFanTopBox(tempLevel3, condensation);
 
     // Active fan Level 3
-    boolean fanLevel3Enabled = (fanTopBoxEnabled || tempLevel3>TEMP_MAX  || humdLevel3 < HUMD_LIMIT_LEVEL) && tempLevel3>TEMP_MIN;
+    boolean fanLevel3Enabled = shouldEnableFanLevel3(tempLevel3, humdLevel3, fanTopBoxEnabled);
 
     // Active fan Level 2
-    boolean fanLevel2Enabled = (tempLevel2>TEMP_MAX || humdLevel2 < HUMD_LIMIT_LEVEL) && tempLevel2>TEMP_MIN;
+    boolean fanLevel2Enabled = shouldEnableFanLevel2(tempLevel2, humdLevel2);
 
     // Active fan Level 1
-    boolean fanLevel1Enabled =  (tempLevel1>TEMP_MAX || humdLevel1 < HUMD_LIMIT_LEVEL) && tempLevel1>TEMP_MIN;
+    boolean fanLevel1Enabled = shouldEnableFanLevel1(tempLevel1, humdLevel1);
 
 
     activateFanTopBox(fanTopBoxEnabled);
