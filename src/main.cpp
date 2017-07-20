@@ -140,7 +140,7 @@ float humidityLevel3() {
   return humidity;
 }
 
-bool shouldEnableFanTopBox(float condensation, float tempLevel3) {
+bool shouldEnableFanTopBox(float tempLevel3, float condensation) {
   // Off - If tempLevel3 is too low
   if ( tempLevel3 < TEMP_MIN ) { return false; }
   // On - If condensation is detected
