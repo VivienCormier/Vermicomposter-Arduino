@@ -156,8 +156,8 @@ bool shouldEnableFanLevel3(float tempLevel3, float humdLevel3, bool fanTopBoxEna
   if ( fanTopBoxEnabled ) { return true; }
   // On - If tempLevel3 is too high
   if ( tempLevel3 > TEMP_MAX ) { return true; }
-  // On - If humdLevel3 is too high
-  if ( humdLevel3 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
+  // // On - If humdLevel3 is too high
+  // if ( humdLevel3 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
   return false;
 }
 
@@ -168,8 +168,8 @@ bool shouldEnableFanLevel2(float tempLevel2, float humdLevel2) {
   if ( humdLevel2 > HUMD_MIN_LIMIT_LEVEL ) { return false; }
   // On - If tempLevel2 is too high
   if ( tempLevel2 > TEMP_MAX ) { return true; }
-  // On - If humdLevel2 is too high
-  if ( humdLevel2 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
+  // // On - If humdLevel2 is too high
+  // if ( humdLevel2 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
   return false;
 }
 
@@ -180,8 +180,8 @@ bool shouldEnableFanLevel1(float tempLevel1, float humdLevel1) {
   if ( humdLevel1 > HUMD_MIN_LIMIT_LEVEL ) { return false; }
   // On - If tempLevel1 is too high
   if ( tempLevel1 > TEMP_MAX ) { return true; }
-  // On - If humdLevel1 is too high
-  if ( humdLevel1 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
+  // // On - If humdLevel1 is too high
+  // if ( humdLevel1 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
   return false;
 }
 
