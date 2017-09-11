@@ -3,7 +3,7 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define HUMD_MAX_LIMIT_LEVEL 100.0
+#define HUMD_MAX_LIMIT_LEVEL 50.0
 #define HUMD_MIN_LIMIT_LEVEL 500.0
 #define COND_LIMIT_LEVEL 600.0
 #define TEMP_MAX 26.0
