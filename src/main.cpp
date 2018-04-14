@@ -154,8 +154,8 @@ bool shouldEnableFanLevel3(float tempLevel3, float humdLevel3, bool fanTopBoxEna
   if ( humdLevel3 > HUMD_MIN_LIMIT_LEVEL ) { return false; }
   // On - If tempLevel3 is too high
   if ( tempLevel3 > TEMP_MAX ) { return true; }
-  // // On - If humdLevel3 is too high
-  // if ( humdLevel3 < HUMD_MAX_LIMIT_LEVEL ) { return true; }
+  // // On - If humdLevel3 is too high or if condenstion detected
+  if ( humdLevel3 < HUMD_MAX_LIMIT_LEVEL || fanTopBoxEnabled ) { return true; }
   return false;
 }
 
